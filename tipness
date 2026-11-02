@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>TipNess - Jastip Kolektif Mahasiswa UNNES</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--g9:#0f3d26;--g7:#1b5e3b;--g2:#d9efdf;--g1:#eef7f0;--cream:#fbf6e9;--o:#e8791d;--ink:#1d2b24;--mut:#5d6f65;--line:#e2dcc8;--red:#b3261e}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--cream);z-index:10}
+a,button,summary,select{touch-action:manipulation}@media(hover:none){body{cursor:pointer}}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.55}
+h1,h2,h3{line-height:1.15;margin:0 0 .5rem;color:var(--g9)}
+h1{font-size:clamp(2rem,6vw,3.3rem);font-weight:800;letter-spacing:-.02em}h2{font-size:1.5rem;font-weight:800}h3{font-size:1.05rem}
+a{color:inherit}button,input,select,textarea{font:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{background:var(--cream);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;max-width:1040px;margin:auto;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.4rem;color:var(--g7);text-decoration:none}.logo b{color:var(--o)}
+nav{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none;order:3;width:100%}
+@media(min-width:900px){nav{order:0;width:auto}}
+nav a{white-space:nowrap;text-decoration:none;padding:7px 12px;border-radius:99px;font-size:.9rem;font-weight:500;color:var(--mut)}
+nav a.on{background:var(--g2);color:var(--g9);font-weight:700}
+.right{display:flex;gap:8px;align-items:center;margin-left:auto}
+main{padding:24px 0 80px;min-height:70vh}
+.btn{display:inline-block;background:var(--o);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
+.btn:hover{filter:brightness(.93)}.btn.g{background:var(--g7)}.btn.o{background:#fff;color:var(--g7);border:2px solid var(--g7)}.btn.w{background:transparent;color:#fff;border:2px solid #fff}
+.btn.sm{padding:6px 13px;font-size:.85rem}.btn.r{background:var(--red)}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.full{width:100%}
+:focus-visible{outline:3px solid var(--o);outline-offset:2px}
+.hero{background:var(--g7);color:#fff;border-radius:22px;padding:40px 28px;display:grid;gap:24px;grid-template-columns:1.3fr 1fr;align-items:center}
+.hero h1{color:#fff}.hero p{color:#d6ecdc;max-width:46ch}.hero .box{background:var(--cream);color:var(--ink);border-radius:16px;padding:18px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+a.card{display:block;text-decoration:none}a.card:hover,.card.hv:hover{border-color:var(--g7);box-shadow:0 4px 14px #1b5e3b22}
+.ph{height:110px;border-radius:10px;display:grid;place-items:center;margin-bottom:10px;overflow:hidden}.ph.big{height:260px}.ph img{width:100%;height:100%;object-fit:cover}
+.tag{display:inline-block;font-size:.75rem;background:var(--g1);color:var(--g7);border-radius:99px;padding:2px 10px;font-weight:700}
+.tag.o{background:#fdebd8;color:#a8520d}.tag.r{background:#fbe3e1;color:var(--red)}
+.mut{color:var(--mut);font-size:.88rem}.price{font-weight:800;color:var(--g9)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}.mt{margin-top:14px}
+.steps{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin:22px 0}
+.note{background:#fff7e0;border:1px solid #f0dc9b;border-radius:10px;padding:10px 14px;font-size:.88rem}
+label{display:block;font-weight:700;font-size:.88rem;margin:12px 0 4px}
+input,select,textarea{border:1px solid #cfc8b0;border-radius:10px;padding:9px 12px;background:#fff;width:100%}
+.filters{display:grid;gap:10px;grid-template-columns:2fr 1fr;margin-bottom:14px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:#fff}
+.qty button{border:0;background:var(--g1);width:32px;height:32px;cursor:pointer;font-weight:800}.qty span{min-width:30px;text-align:center}
+.two{display:grid;gap:18px;grid-template-columns:1.4fr 1fr;align-items:start}
+.sum div{display:flex;justify-content:space-between;padding:4px 0;gap:10px}
+.sum .tot{border-top:2px dashed var(--line);margin-top:6px;padding-top:10px;font-weight:800;font-size:1.1rem}
+.tl{list-style:none;padding:0;margin:10px 0 0}.tl li{padding:4px 0 4px 26px;position:relative}
+.tl li:before{content:"";position:absolute;left:4px;top:11px;width:12px;height:12px;border-radius:50%;background:var(--g7)}
+.tl li.n{color:var(--mut)}.tl li.n:before{background:#d6d0ba}
+.bar2{height:8px;background:var(--g2);border-radius:9px;overflow:hidden}.bar2 i{display:block;height:100%;background:var(--o)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px}.tabs a{padding:7px 14px;border-radius:99px;background:#fff;border:1px solid var(--line);text-decoration:none;font-weight:700;font-size:.88rem;white-space:nowrap}.tabs a.on{background:var(--g7);color:#fff;border-color:var(--g7)}
+.err{color:var(--red);font-size:.88rem;margin-top:6px}
+.auth{max-width:420px;margin:20px auto}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--g9);color:#fff;padding:11px 20px;border-radius:12px;display:none;z-index:20;max-width:90vw}#toast.er{background:var(--red)}
+.empty{text-align:center;padding:40px 16px;color:var(--mut)}
+.modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:30;padding:16px}.modal.on{display:grid}.modal>div{background:#fff;border-radius:16px;padding:22px;max-width:440px;width:100%}
+footer{text-align:center;color:var(--mut);font-size:.8rem;padding:20px 16px 40px}
+@media(max-width:760px){.hero,.two,.filters{grid-template-columns:1fr}.hero{padding:26px 18px}.ph.big{height:200px}}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap}.chip.on{background:var(--g7);color:#fff;border-color:var(--g7)}
+.heart{position:absolute;top:22px;right:22px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#fffd;cursor:pointer;display:grid;place-items:center;color:var(--mut)}.heart.on{color:var(--red)}
+.skel{height:210px;border-radius:14px;background:linear-gradient(90deg,#eee8d4 25%,#f7f2e2 50%,#eee8d4 75%);background-size:200% 100%;animation:sh 1.1s infinite}@keyframes sh{to{background-position:-200% 0}}
+.fi{animation:fi .3s}@keyframes fi{from{opacity:0;transform:translateY(6px)}}
+.drawer{position:fixed;inset:0;display:none;z-index:25}.drawer.on{display:block}.ov{position:absolute;inset:0;background:#0006}.dp{position:absolute;right:0;top:0;bottom:0;width:min(380px,100%);background:#fff;padding:18px;overflow:auto;animation:sl .25s}@keyframes sl{from{transform:translateX(30px);opacity:0}}
+details.faq{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:8px}details.faq summary{cursor:pointer;font-weight:700}details.faq[open]{border-color:var(--g7)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="bar"><a class="logo" href="#/">Tip<b>Ness</b></a><nav id="nav"></nav><div class="right" id="right"></div></div></header>
+<main class="wrap" id="app"></main>
+<footer>TipNess: tolong banyak, ambil untung sedikit. Harga dan ketersediaan barang dapat berubah sewaktu-waktu.</footer>
+<div id="toast" role="status"></div><div id="drawer" class="drawer"></div><div class="modal" id="modal"><div id="mbody"></div></div>
+<script>
+// Konfigurasi Supabase
+const SUPABASE_URL = "https://gufqfhpcijjfkltcphey.supabase.co";
+const SUPABASE_KEY = "sb_publishable_1IoJkd2xWCSV8ukj8IIYjQ_QSBJRi5F";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const IMG={}; 
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rp=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+const fdt=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const CATS=["kebutuhan harian","kebutuhan kos","alat tulis","minuman","makanan"];
+const ICON={makanan:'<path d="M8 28h48a24 24 0 0 1-48 0z"/><path d="M22 18c0-5 6-5 6-10M36 18c0-5 6-5 6-10"/>',minuman:'<path d="M16 12h32l-4 44H20z"/><path d="M16 24h32"/>',"kebutuhan kos":'<path d="M8 32 32 10l24 22M16 28v26h32V28"/>',"alat tulis":'<path d="M10 54l4-14L42 12l10 10-28 28z"/>',"kebutuhan harian":'<path d="M14 20h36l4 36H10zM24 28v-8a8 8 0 0 1 16 0v8"/>'};
+const TONE={makanan:['#fde6cf','#c4600f'],minuman:['#d6ecf5','#1d6f8f'],"kebutuhan kos":['#e5e0f4','#5b4aa0'],"alat tulis":['#fbe9a8','#8a6b00'],"kebutuhan harian":['#d9efdf','#1b5e3b']};
+const SL={open:"Terbuka",locked:"Dikunci",shopping:"Sedang dibelanjakan",on_the_way:"Dalam perjalanan",arrived:"Tiba di Sekaran",completed:"Selesai",cancelled:"Dibatalkan"};
+const STEPS=["open","locked","shopping","on_the_way","arrived","completed"];
+const ISL={pending:"Menunggu",purchased:"Sudah dibeli",unavailable:"Tidak tersedia",cancelled:"Dibatalkan"};
+
+let S = { me: null, cart: [], pref: null, orders: [], reviews: [], users: [], products: [], pts:["Titik Kumpul Gerbang Sekaran","Titik Kumpul Gunungpati","Titik Kumpul Kos Area Sekaran"], vouchers: [], batches: [] };
+
+async function initDB() {
+  const { data: users } = await sb.from('users').select('*');
+  const { data: products } = await sb.from('products').select('*');
+  const { data: batches } = await sb.from('batches').select('*');
+  const { data: orders } = await sb.from('orders').select('*');
+  const { data: vouchers } = await sb.from('vouchers').select('*');
+  const { data: reviews } = await sb.from('reviews').select('*');
+
+  if (!users || users.length === 0) {
+    // Seed default data if empty
+    const raw=[["Nasi Ayam Geprek","makanan",18000,"Warung Makan Semarang Bawah"],["Mie Ayam Bakso","makanan",15000,"Warung Makan Semarang Bawah"],["Nasi Goreng Spesial","makanan",16000,"Warung Makan Semarang Bawah"],["Soto Ayam","makanan",14000,"Warung Makan Semarang Bawah"],["Lumpia Semarang (3 pcs)","makanan",20000,"Warung Makan Semarang Bawah"],
+    ["Es Teh Manis Jumbo","minuman",6000,"Kedai Minum Semarang Bawah"],["Kopi Susu Gula Aren","minuman",15000,"Kedai Minum Semarang Bawah"],["Matcha Latte","minuman",17000,"Kedai Minum Semarang Bawah"],["Jus Alpukat","minuman",13000,"Kedai Minum Semarang Bawah"],["Air Mineral 1,5 L","minuman",6000,"Kedai Minum Semarang Bawah"],
+    ["Sapu Lantai","kebutuhan kos",22000,"Toko Kebutuhan Kos"],["Gantungan Baju (isi 10)","kebutuhan kos",15000,"Toko Kebutuhan Kos"],["Lampu LED 9 Watt","kebutuhan kos",20000,"Toko Kebutuhan Kos"],["Colokan Terminal 4 Lubang","kebutuhan kos",45000,"Toko Kebutuhan Kos"],
+    ["Buku Tulis Isi 38 (5 pcs)","alat tulis",25000,"Toko Alat Tulis"],["Pulpen Gel Hitam (3 pcs)","alat tulis",12000,"Toko Alat Tulis"],["Map Plastik Folder (5 pcs)","alat tulis",10000,"Toko Alat Tulis"],
+    ["Sabun Mandi Cair 450 ml","kebutuhan harian",21000,"Minimarket Harian"],["Deterjen Bubuk 800 g","kebutuhan harian",19000,"Minimarket Harian"],["Tisu Wajah 250 lembar","kebutuhan harian",12000,"Minimarket Harian"],["Mie Instan (5 pcs)","kebutuhan harian",17000,"Minimarket Harian"]];
+    
+    const defUsers=[{id:1,name:'Admin TipNess',email:'admin@tipness.id',pass:'admin123',phone:'08120000001',role:'admin',nim:'',vs:'ok',"on":true},{id:2,name:'Rizky Pratama',email:'jastiper@tipness.id',pass:'jastiper123',phone:'08120000002',role:'jastiper',nim:'',vs:'ok',"on":true},{id:3,name:'Salsa Putri',email:'mahasiswa@tipness.id',pass:'mahasiswa123',phone:'08120000003',role:'customer',nim:'',vs:'none',"on":true}];
+    const defProducts=raw.map((p,i)=>({id:i,name:p[0],cat:p[1],price:p[2],merchant:p[3],max:5,"on":i!==7}));
+    const H=36e5,now=Date.now();
+    const defBatches=[{id:'TN-001',day:'Besok',dep:'15:00',arr:'17:00',cut:now+20*H,st:'open',min:3,max:12,cost:15000,pt:0,j:null},{id:'TN-002',day:'Hari ini',dep:'16:00',arr:'18:00',cut:now-H,st:'locked',min:3,max:12,cost:15000,pt:1,j:2},{id:'TN-003',day:'Hari ini',dep:'13:00',arr:'15:00',cut:now-4*H,st:'shopping',min:3,max:12,cost:12000,pt:2,j:2}];
+    const defVouchers=[{code:'UNNESHEMAT',t:'fixed',v:5000,min:30000,max:0,quota:100,used:0,"on":true,d:'Diskon Rp5.000 min. belanja Rp30.000'},{code:'MAHASISWABARU',t:'pct',v:10,min:20000,max:8000,quota:100,used:0,"on":true,d:'Diskon 10% maks Rp8.000 min. belanja Rp20.000'}];
+
+    await sb.from('users').upsert(defUsers);
+    await sb.from('products').upsert(defProducts);
+    await sb.from('batches').upsert(defBatches);
+    await sb.from('vouchers').upsert(defVouchers);
+    
+    S.users = defUsers; S.products = defProducts; S.batches = defBatches; S.vouchers = defVouchers;
+  } else {
+    S.users = users; S.products = products; S.batches = batches; S.orders = orders || []; S.vouchers = vouchers || []; S.reviews = reviews || [];
+  }
+  nav();
+}
+
+S.fav=JSON.parse(localStorage.getItem('tn_fav')||'[]');
+const saveFav=()=>localStorage.setItem('tn_fav',JSON.stringify(S.fav));
+
+async function saveOrderToDB(o) {
+  await sb.from('orders').upsert(o);
+}
+
+async function updateDB(table, data, matchCol, matchVal) {
+  await sb.from(table).update(data).eq(matchCol, matchVal);
+}
+
+const me=()=>S.users.find(u=>u.id===S.me),prod=id=>S.products.find(p=>p.id==id),bt=id=>S.batches.find(b=>b.id===id),usr=id=>S.users.find(u=>u.id==id);
+const cnt=b=>S.orders.filter(o=>o.batch===b.id&&!o.cancel).length;
+const isOpen=b=>b.st==='open'&&b.cut>Date.now()&&cnt(b)<b.max;
+const jastip=s=>Math.max(2000,Math.floor(s*5/100)),ship=(b,extra=1)=>Math.ceil(b.cost/Math.max(cnt(b)+extra,b.min));
+const subOf=items=>items.reduce((a,c)=>a+c.q*c.p,0);
+function disc(v,sub,sh,jf,ex){if(!v||!v.on||sub<v.min)return 0;let d=v.t==='fixed'?v.v:v.t==='pct'?Math.min(Math.floor(sub*v.v/100),v.max||1e9):sh;return Math.min(d,sub+sh+jf+ex)}
+const log=(o,s)=>o.log.push({t:Date.now(),s});
+function mkOrder(uid,bid,ids,method='pt'){const b=bt(bid),items=ids.map(([i,q])=>({n:prod(i).name,p:prod(i).price,q,st:'pending',note:''})),sub=subOf(items),jf=jastip(sub),sh=ship(b),ex=method==='dl'?5000:0;
+return {code:'TN-'+Math.random().toString(36).slice(2,8).toUpperCase(),uid,batch:bid,pt:b.pt,method,items,sub,jf,sh,ex,dc:0,total:sub+jf+sh+ex,pay:'Transfer bank',paid:false,ready:false,cancel:false,pick:String(Math.floor(Math.random()*1e6)).padStart(6,'0'),note:'',log:[{t:Date.now(),s:'Pesanan dibuat'}]}}
+
+function ph(p,big){const t=TONE[p.cat],s=IMG[p.name];return `<div class="ph ${big?'big':''}" style="background:${t[0]};color:${t[1]}">${s?`<img src="${s}" alt="${esc(p.name)}">`:`<svg viewBox="0 0 64 64" width="${big?110:50}" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[p.cat]}</svg>`}</div>`}
+function toast(m,er,fn){const t=$('#toast');t.textContent=m;t.onclick=fn||null;t.style.cursor=fn?'pointer':'';t.className=er?'er':'';t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2800)}
+function ask(html,ok,label='Ya, lanjutkan'){$('#mbody').innerHTML=html+`<div class="row mt" style="justify-content:flex-end"><button class="btn o sm" data-act="mx">Batal</button><button class="btn sm" id="mo">${label}</button></div>`;$('#modal').classList.add('on');$('#mo').onclick=()=>{$('#modal').classList.remove('on');ok()}}
+let CUR=location.hash.startsWith('#/')?location.hash:'#/',HIST=[];
+const go=(h,back)=>{if(!back&&CUR!==h)HIST.push(CUR);CUR=h;try{history.replaceState(null,'',h)}catch(e){}nav();scrollTo(0,0);const a=$('#app');a.classList.remove('fi');void a.offsetWidth;a.classList.add('fi')};
+const cartN=()=>S.cart.reduce((a,c)=>a+c.q,0);
+function ostat(o){if(o.cancel)return['Dibatalkan','r'];const b=bt(o.batch);if(!o.paid)return['Menunggu pembayaran','o'];if(o.ready)return['Siap diambil',''];return[SL[b.st],b.st==='completed'?'':'o']}
+function batchCard(b){const o=isOpen(b),c=cnt(b),pct=Math.min(100,Math.round(c/b.max*100));
+return `<a class="card" href="#/b/${b.id}" style="margin:12px 0"><div class="row sp"><div><b>${b.id}</b> <span class="tag ${o?'':'o'}">${o?'Menerima pesanan':SL[b.st]}</span></div><span class="mut">Semarang Bawah ke Sekaran</span></div>
+<div class="mut" style="margin:6px 0">${b.day}, berangkat ${b.dep}, estimasi tiba maks ${b.arr}. ${S.pts[b.pt]}.</div>
+<div class="row sp"><span class="mut">${c} dari ${b.max} pesanan (min. ${b.min})</span><span class="mut">Estimasi ongkir <b>${rp(ship(b))}</b>/orang</span></div><div class="bar2" style="margin-top:8px"><i style="width:${pct}%"></i></div>${o?`<div class="mut" style="margin-top:6px">Tutup dalam <b data-cd="${b.cut}"></b></div>`:''}</a>`}
+const R={};
+R.home=()=>{const nb=S.batches.find(isOpen);
+return `<section class="hero"><div><h1>Tolong banyak, ambil untung sedikit.</h1><p>Titip belanjaan dari Semarang Bawah ke Sekaran dalam satu batch. Ongkir dibagi bersama, jadi lebih hemat. Kamu memilih jadwal batch dan bersedia menunggu.</p><div class="row mt"><a class="btn" href="#/catalog">Mulai titip</a><a class="btn w" href="#/batches">Lihat batch aktif</a></div></div>
+<div class="box"><h3>Simulasi hemat ongkir (estimasi)</h3><label for="sim" style="margin-top:0">Pemesan dalam batch: <span id="simn">6</span></label><input type="range" id="sim" min="1" max="12" value="6" data-chg="sim" style="padding:0"><div class="sum" id="simo"></div></div></section>
+<div class="steps"><a class="card" href="#/catalog"><h3>1. Pilih barang</h3><p class="mut">Cari barang kebutuhanmu di katalog Semarang Bawah.</p></a><a class="card" href="#/batches"><h3>2. Pilih jadwal batch</h3><p class="mut">Pesanan dikumpulkan sampai batas waktu, lalu jastiper berbelanja.</p></a><a class="card" href="#/orders"><h3>3. Ambil di titik kumpul</h3><p class="mut">Tunjukkan kode pengambilan saat barang tiba di Sekaran.</p></a></div>
+<div class="note"><b>Bukan layanan antar instan.</b> Barang diantar sesuai jadwal batch, bukan langsung setelah kamu memesan.</div>
+<h2 style="margin-top:26px">Batch terdekat</h2>${nb?batchCard(nb):'<div class="empty">Belum ada batch yang terbuka.</div>'}
+<h2 style="margin-top:26px">Kategori</h2><div class="grid">${CATS.map(c=>`<a class="card" href="#/catalog/${encodeURIComponent(c)}">${ph({cat:c,name:''})}<b>${c}</b></a>`).join('')}</div>
+<h2 style="margin-top:26px">Kenapa TipNess</h2><div class="steps"><div class="card"><h3>Biaya transparan</h3><p class="mut">Subtotal, fee jastip, ongkir, dan diskon terlihat sebelum kamu memesan.</p></div><div class="card"><h3>Ongkir patungan</h3><p class="mut">Makin banyak pemesan dalam satu batch, makin murah ongkir per orang.</p></div><div class="card"><h3>Kode pengambilan</h3><p class="mut">Barang hanya diserahkan kepada pemilik kode, jadi lebih aman.</p></div></div>
+<h2 style="margin-top:26px">Pertanyaan umum</h2>${[['Apa bedanya dengan layanan antar instan?','TipNess mengantar sesuai jadwal batch. Kamu menunggu sampai batch berangkat, sebagai gantinya ongkir dibagi bersama dan jauh lebih hemat.'],['Kapan barangku sampai?','Lihat jadwal berangkat dan estimasi tiba di setiap batch. Status terbaru selalu ada di halaman pesanan.'],['Bagaimana kalau barang tidak tersedia?','Jastiper menandai barang tidak tersedia atau menawarkan pengganti lewat catatan. Kamu bisa melihatnya di detail pesanan.'],['Bisakah pesanan dibatalkan?','Bisa, gratis, selama batch masih terbuka. Setelah batch dikunci pesanan tidak dapat dibatalkan.']].map(f=>`<details class="faq"><summary>${f[0]}</summary><p class="mut">${f[1]}</p></details>`).join('')}`};
+const HEART=f=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.5-8 11-8 11z"/></svg>`;
+function pcard(p){const c=S.cart.find(x=>x.id===p.id),f=S.fav.includes(p.id);return `<div class="card hv" style="position:relative"><button class="heart ${f?'on':''}" data-act="fav" data-id="${p.id}" aria-label="${f?'Hapus dari favorit':'Simpan ke favorit'}" aria-pressed="${f}">${HEART(f)}</button><a href="#/p/${p.id}" style="text-decoration:none">${ph(p)}<span class="tag">${p.cat}</span><h3 style="margin-top:6px">${esc(p.name)}</h3><div class="mut">${esc(p.merchant)}</div></a><div class="row sp mt"><span class="price">${rp(p.price)}</span>${!p.on?'<span class="tag r">Habis</span>':c?`<div class="qty"><button data-act="dec" data-id="${p.id}" aria-label="Kurangi">-</button><span>${c.q}</span><button data-act="inc" data-id="${p.id}" aria-label="Tambah">+</button></div>`:`<button class="btn sm" data-act="add" data-id="${p.id}">Tambah</button>`}</div></div>`}
+R.catalog=cat=>`<h2>Katalog</h2><p class="mut">Barang kebutuhan kuliah dan kos dari Semarang Bawah. Harga dan ketersediaan dapat berubah.</p>${S.pref&&bt(S.pref)?`<div class="note row sp" style="margin:10px 0"><span>Batch <b>${S.pref}</b> dipilih untuk pesananmu.</span><button class="btn o sm" data-act="unpref">Ganti batch</button></div>`:''}<input type="hidden" id="cf" value="${esc(cat||'')}"><div class="filters"><input id="q" data-chg="filt" placeholder="Cari barang atau toko" aria-label="Cari barang" autocomplete="off"><select id="cs" data-chg="filt" aria-label="Urutkan"><option value="rek">Rekomendasi</option><option value="lo">Harga terendah</option><option value="hi">Harga tertinggi</option><option value="az">Nama A-Z</option></select></div><div class="chips" id="chips"></div><div class="row sp" style="margin-bottom:10px"><span class="mut" id="rc"></span><label class="row" style="margin:0;font-weight:500"><input type="checkbox" id="ca" data-chg="filt" style="width:auto"> Tersedia saja</label></div><div class="grid" id="pl">${'<div class="skel"></div>'.repeat(4)}</div>`;
+function drawCat(){if(!$('#pl'))return;const q=$('#q').value.toLowerCase().trim(),c=$('#cf').value,so=$('#cs').value,av=$('#ca').checked,k=p=>S.products.filter(x=>x.cat===p.cat&&x.id<p.id).length;
+const l=S.products.filter(p=>(p.name.toLowerCase().includes(q)||p.merchant.toLowerCase().includes(q))&&(!c||(c==='__fav'?S.fav.includes(p.id):p.cat===c))&&(!av||p.on));
+l.sort(so==='lo'?(a,b)=>a.price-b.price:so==='hi'?(a,b)=>b.price-a.price:so==='az'?(a,b)=>a.name.localeCompare(b.name):(a,b)=>k(a)-k(b)||CATS.indexOf(a.cat)-CATS.indexOf(b.cat));
+$('#chips').innerHTML=[['','Semua'],...CATS.map(x=>[x,x]),['__fav','Favorit ('+S.fav.length+')']].map(x=>`<button class="chip ${x[0]===c?'on':''}" data-act="chip" data-c="${esc(x[0])}">${esc(x[1])}</button>`).join('');
+$('#rc').textContent=l.length+' barang';$('#pl').innerHTML=l.length?l.map(pcard).join(''):`<div class="empty" style="grid-column:1/-1">${c==='__fav'?'Belum ada favorit. Tekan ikon hati pada barang.':'Barang tidak ditemukan. Coba kata kunci lain.'}</div>`}
+function rf(){const r=CUR.slice(2).split('/')[0]||'home';if(r==='catalog'){head(r);drawCat()}else nav();if($('#drawer').classList.contains('on'))drawDrawer()}
+function drawDrawer(){const sub=S.cart.reduce((a,c)=>a+c.q,0);$('#drawer').innerHTML=`<div class="ov" data-act="dclose"></div><div class="dp"><div class="row sp"><h3>Keranjang (${cartN()})</h3><button class="btn o sm" data-act="dclose">Tutup</button></div>${S.cart.length?S.cart.map(c=>{const p=prod(c.id);return `<div class="row sp" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${esc(p.name)}</b><div class="mut">${rp(p.price)}</div></div><div class="qty"><button data-act="dec" data-id="${p.id}" aria-label="Kurangi">-</button><span>${c.q}</span><button data-act="inc" data-id="${p.id}" aria-label="Tambah">+</button></div></div>`}).join('')+`<div class="row sp mt"><span>Subtotal</span><b>${rp(subOf(S.cart.map(x=>({q:x.q,p:prod(x.id).price}))))}</b></div><a class="btn full mt" href="#/checkout" data-act="dclose">Checkout</a><a class="btn o full mt" href="#/cart" data-act="dclose">Lihat keranjang</a>`:'<div class="empty">Keranjang masih kosong.<br><a class="btn mt" href="#/catalog" data-act="dclose">Cari barang</a></div>'}</div>`}
+R.p=id=>{const p=prod(id);if(!p)return R.nf();const rel=S.products.filter(x=>x.cat===p.cat&&x.id!==p.id&&x.on).slice(0,4);
+return `<a href="#/catalog" class="mut">Kembali ke katalog</a><div class="two mt"><div>${ph(p,1)}</div><div><span class="tag">${p.cat}</span><h2 style="margin-top:8px">${esc(p.name)}</h2><div class="mut">Dari ${esc(p.merchant)}, Semarang Bawah</div><div class="price" style="font-size:1.6rem;margin:10px 0">${rp(p.price)}</div>
+<p>${p.on?`<span class="tag">Tersedia</span>`:'<span class="tag r">Sedang tidak tersedia</span>'} <span class="mut">Maksimal ${p.max} per pesanan</span></p><p class="mut">Harga dan ketersediaan dapat berubah sesuai kondisi merchant saat jastiper berbelanja.</p>
+<div class="row mt"><div class="qty"><button data-act="pq" data-max="${p.max}" data-d="-1" aria-label="Kurangi">-</button><span id="pq">1</span><button data-act="pq" data-max="${p.max}" data-d="1" aria-label="Tambah">+</button></div><button class="btn" data-act="addq" data-id="${p.id}" ${p.on?'':'disabled'}>Tambah ke keranjang</button><button class="btn g" data-act="buy" data-id="${p.id}" ${p.on?'':'disabled'}>Titip sekarang</button></div><div class="row mt"><button class="btn o sm" data-act="fav" data-id="${p.id}">${S.fav.includes(p.id)?'Hapus dari favorit':'Simpan ke favorit'}</button><button class="btn o sm" data-act="copy">Salin tautan</button></div></div></div>
+${rel.length?`<h3 style="margin-top:28px">Produk serupa</h3><div class="grid">${rel.map(pcard).join('')}</div>`:''}`};
+R.batches=()=>`<h2>Batch aktif</h2><p class="mut">Pesanan hanya diterima saat batch terbuka dan belum melewati batas waktu.</p>${S.batches.map(batchCard).join('')}`;
+R.b=id=>{const b=bt(id);if(!b)return R.nf();const u=me(),own=u&&(u.role==='admin'||b.j===u.id),os=S.orders.filter(o=>o.batch===b.id&&!o.cancel),j=b.j?usr(b.j):null,i=STEPS.indexOf(b.st);
+let h=`<a href="#/batches" class="mut" data-act="back">Kembali</a><h2 class="mt">Batch ${b.id} <span class="tag ${isOpen(b)?'':'o'}">${SL[b.st]}</span></h2><div class="two"><div class="card sum"><div><span>Rute</span><b>Semarang Bawah ke Sekaran</b></div><div><span>Jadwal</span><b>${b.day}, ${b.dep}</b></div><div><span>Estimasi tiba</span><b>maks ${b.arr}</b></div><div><span>Batas pesanan</span><b>${fdt(b.cut)}</b></div><div><span>Titik pengambilan</span><b>${S.pts[b.pt]}</b></div><div><span>Pesanan</span><b>${os.length} / ${b.max} (min. ${b.min})</b></div><div><span>Biaya perjalanan</span><b>${rp(b.cost)}</b></div><div><span>Estimasi ongkir per orang</span><b>${rp(ship(b))}</b></div><div><span>Jastiper</span><b>${j?esc(j.name):'Belum ada'}</b></div></div>
+<div class="card"><h3>Progres batch</h3><div class="bar2"><i style="width:${i/5*100}%"></i></div><ul class="tl">${STEPS.map((s,k)=>`<li class="${k>i?'n':''}">${SL[s]}</li>`).join('')}</ul>${isOpen(b)?`<p class="mut mt">Tutup dalam <b data-cd="${b.cut}"></b></p><button class="btn full mt" data-act="tobatch" data-id="${b.id}">Titip ke batch ini</button>`:'<p class="mut">Batch ini tidak menerima pesanan baru.</p>'}</div></div>`;
+if(own){const nx=STEPS[i+1];h+=`<div class="row sp mt"><h2>Kelola pesanan</h2>${b.st!=='cancelled'&&nx?`<button class="btn g" data-act="adv" data-id="${b.id}">Ubah status ke: ${SL[nx]}</button>`:''}</div>`+(os.length?os.map(o=>`<div class="card" style="margin-bottom:12px"><div class="row sp"><div><b>${o.code}</b> <span class="mut">${esc(usr(o.uid).name)}${o.method==='dl'?', antar ke kos':''}</span></div><div class="row"><span class="tag ${ostat(o)[1]}">${ostat(o)[0]}</span><span class="mut">Kode: <b>${o.pick}</b></span></div></div>
+${o.items.map((it,k)=>`<div class="row sp" style="padding:8px 0;border-top:1px solid var(--line)"><span>${esc(it.n)} x${it.q}</span><span class="row"><select data-chg="ist" data-o="${o.code}" data-k="${k}" aria-label="Status item" style="width:auto">${Object.keys(ISL).map(s=>`<option value="${s}" ${s===it.st?'selected':''}>${ISL[s]}</option>`).join('')}</select><input data-chg="inote" data-o="${o.code}" data-k="${k}" value="${esc(it.note)}" placeholder="Catatan pengganti" aria-label="Catatan" style="width:170px"></span></div>`).join('')}
+<div class="row mt">${!o.ready?`<button class="btn sm g" data-act="ready" data-o="${o.code}" ${b.st==='arrived'||b.st==='completed'?'':'disabled'}>Tandai siap diambil</button>${b.st==='arrived'||b.st==='completed'?'':'<span class="mut">Aktif setelah batch tiba di Sekaran</span>'}`:'<span class="tag">Siap diambil</span>'}</div></div>`).join(''):'<div class="empty">Belum ada pesanan di batch ini.</div>')}return h};
+R.cart=()=>{if(!S.cart.length)return `<div class="empty"><h2>Keranjangmu kosong</h2><p>Pilih barang dari katalog dulu.</p><a class="btn" href="#/catalog">Ke katalog</a></div>`;const sub=subOf(S.cart.map(x=>({q:x.q,p:prod(x.id).price})));
+return `<h2>Keranjang</h2><div class="two"><div>${S.cart.map(c=>{const p=prod(c.id);return `<div class="card row sp" style="margin-bottom:10px"><a href="#/p/${p.id}" style="text-decoration:none"><b>${esc(p.name)}</b><div class="mut">${esc(p.merchant)}</div><div class="price">${rp(p.price)}</div></a><div class="row"><div class="qty"><button data-act="dec" data-id="${p.id}" aria-label="Kurangi">-</button><span>${c.q}</span><button data-act="inc" data-id="${p.id}" aria-label="Tambah">+</button></div><button class="btn o sm" data-act="del" data-id="${p.id}">Hapus</button></div></div>`}).join('')}<a class="btn o sm" href="#/catalog">Tambah barang lain</a></div>
+<div class="card sum"><div><span>Subtotal barang</span><b>${rp(sub)}</b></div><p class="mut">Fee jastip, ongkir kolektif, dan voucher dihitung di checkout.</p><a class="btn full" href="#/checkout">Lanjut ke checkout</a></div></div>`};
+R.checkout=()=>{if(!S.cart.length){go('#/cart');return ''}const ob=S.batches.filter(isOpen);
+return `<h2>Checkout</h2><div class="two"><div class="card"><label for="cb" style="margin-top:0">Batch (hanya yang terbuka)</label><select id="cb" data-chg="quote">${ob.length?ob.map(b=>`<option value="${b.id}" ${b.id===S.pref?'selected':''}>${b.id} - ${b.day} ${b.dep}, tutup ${fdt(b.cut)}</option>`).join(''):'<option value="">Tidak ada batch terbuka</option>'}</select>
+<label for="cp">Titik pengambilan</label><select id="cp">${S.pts.map((p,i)=>`<option value="${i}">${p}</option>`).join('')}</select>
+<label for="cm">Metode pengambilan</label><select id="cm" data-chg="quote"><option value="pt">Ambil di titik kumpul</option><option value="dl">Antar ke kos (+ ${rp(5000)})</option></select>
+<label for="cy">Pembayaran</label><select id="cy"><option>Transfer bank</option><option>QRIS</option><option>Bayar di titik kumpul</option></select>
+<label for="cv">Voucher</label><div class="row"><input id="cv" placeholder="Masukkan kode" style="flex:1" autocomplete="off"><button class="btn g sm" data-act="applyv">Pakai voucher</button></div><div class="mut" id="vm"></div>
+<label for="cn">Catatan untuk jastiper</label><textarea id="cn" rows="2" placeholder="Contoh: tanpa sambal"></textarea></div><div class="card sum" id="cs"></div></div>`};
+let VC=null;
+function quote(){const b=bt($('#cb').value),it=S.cart.map(c=>({p:prod(c.id).price,q:c.q})),sub=subOf(it);if(!b){$('#cs').innerHTML='<div class="empty">Belum ada batch terbuka. Coba lagi nanti.</div>';return}
+const jf=jastip(sub),sh=ship(b),ex=$('#cm').value==='dl'?5000:0,dc=disc(VC,sub,sh,jf,ex),tot=sub+jf+sh+ex-dc;
+$('#cs').innerHTML=`<h3>Rincian biaya</h3><div><span>Subtotal barang</span><span>${rp(sub)}</span></div><div><span>Fee jastip</span><span>${rp(jf)}</span></div><div><span>Ongkir kolektif (estimasi)</span><span>${rp(sh)}</span></div>${ex?`<div><span>Biaya antar ke kos</span><span>${rp(ex)}</span></div>`:''}${dc?`<div><span>Diskon voucher</span><span>-${rp(dc)}</span></div>`:''}<div class="tot"><span>Total bayar</span><span>${rp(tot)}</span></div>
+<p class="mut">Barang diantar sesuai jadwal batch. Pesanan dapat dibatalkan gratis selama batch masih terbuka; setelah batch dikunci tidak dapat dibatalkan.</p><button class="btn full" data-act="place">Buat pesanan</button>`}
+R.orders=f=>{if(!S.orders.some(o=>o.uid===S.me))return `<div class="empty"><h2>Belum ada pesanan</h2><p>Pesanan yang kamu buat akan muncul di sini.</p><a class="btn" href="#/catalog">Mulai titip</a></div>`;
+const l=S.orders.filter(o=>o.uid===S.me).reverse().filter(o=>!f||(f==='aktif'?!o.cancel&&bt(o.batch).st!=='completed':f==='selesai'?!o.cancel&&bt(o.batch).st==='completed':o.cancel));
+return `<h2>Pesanan saya</h2><div class="tabs">${[['','Semua'],['aktif','Aktif'],['selesai','Selesai'],['batal','Dibatalkan']].map(t=>`<a href="#/orders/${t[0]}" class="${(f||'')===t[0]?'on':''}">${t[1]}</a>`).join('')}</div>`+(l.length?l.map(o=>{const s=ostat(o);return `<a class="card" href="#/o/${o.code}" style="margin-bottom:10px"><div class="row sp"><b>${o.code}</b><span class="tag ${s[1]}">${s[0]}</span></div><div class="mut">${o.items.map(i=>esc(i.n)+' x'+i.q).join(', ')}</div><div class="row sp"><span class="mut">Batch ${o.batch}, ${bt(o.batch).day} ${bt(o.batch).dep}</span><b>${rp(o.total)}</b></div></a>`}).join(''):'<div class="empty">Tidak ada pesanan di kategori ini.</div>')};
+R.o=code=>{const o=S.orders.find(x=>x.code===code),u=me();if(!o||!(o.uid===u.id||u.role==='admin'||bt(o.batch).j===u.id))return R.nf();const b=bt(o.batch),s=ostat(o),rv=S.reviews.find(r=>r.o===o.code),mine=o.uid===u.id;
+return `<a href="#/orders" class="mut" data-act="back">Kembali</a><div class="row sp mt"><h2>${o.code}</h2><span class="tag ${s[1]}">${s[0]}</span></div><div class="two"><div class="card"><h3>Barang</h3>${o.items.map(i=>`<div class="row sp" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${esc(i.n)} x${i.q}<br><span class="mut">${ISL[i.st]}${i.note?': '+esc(i.note):''}</span></span><span>${rp(i.p*i.q)}</span></div>`).join('')}
+<div class="sum mt"><div><span>Subtotal</span><span>${rp(o.sub)}</span></div><div><span>Fee jastip</span><span>${rp(o.jf)}</span></div><div><span>Ongkir kolektif</span><span>${rp(o.sh)}</span></div>${o.ex?`<div><span>Biaya antar</span><span>${rp(o.ex)}</span></div>`:''}${o.dc?`<div><span>Diskon voucher</span><span>-${rp(o.dc)}</span></div>`:''}<div class="tot"><span>Total</span><span>${rp(o.total)}</span></div></div></div>
+<div><div class="card sum"><div><span>Batch</span><a href="#/b/${b.id}"><b>${b.id}</b></a></div><div><span>Jadwal</span><b>${b.day} ${b.dep}</b></div><div><span>Pengambilan</span><b>${S.pts[o.pt]}</b></div><div><span>Pembayaran</span><b>${o.pay}, ${o.paid?'lunas':'belum dibayar'}</b></div>${o.note?`<div><span>Catatan</span><b>${esc(o.note)}</b></div>`:''}</div>
+${o.cancel?'':`<div class="note mt">Kode pengambilan: <b style="letter-spacing:.15em;font-size:1.1rem">${o.pick}</b><br><span class="mut">Hanya terlihat oleh pemesan dan jastiper batch ini.</span></div>`}
+<div class="card mt"><h3>Riwayat status</h3><ul class="tl">${o.log.map(l=>`<li>${esc(l.s)}<br><span class="mut">${fdt(l.t)}</span></li>`).join('')}</ul></div>
+<div class="row mt">${mine&&!o.paid&&!o.cancel?`<button class="btn g" data-act="pay" data-o="${o.code}">Saya sudah membayar</button>`:''}${mine&&!o.cancel&&b.st==='open'?`<button class="btn r" data-act="cancel" data-o="${o.code}">Batalkan pesanan</button>`:''}</div>
+${mine&&b.st==='completed'&&!o.cancel?(rv?`<div class="card mt"><h3>Ulasanmu</h3><p>Rating ${rv.r} dari 5. ${esc(rv.c)}</p></div>`:`<form class="card mt" data-form="review" data-o="${o.code}"><h3>Beri ulasan</h3><label for="rt">Rating</label><select id="rt">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select><label for="rc">Komentar</label><textarea id="rc" rows="2"></textarea><button class="btn mt">Kirim ulasan</button></form>`):''}</div></div>`};
+R.jastiper=()=>{const u=me(),mine=S.batches.filter(b=>b.j===u.id),free=S.batches.filter(b=>!b.j&&b.st!=='cancelled'&&b.st!=='completed'),done=mine.filter(b=>b.st==='completed'),act=mine.filter(b=>b.st!=='completed'&&b.st!=='cancelled');
+const earn=bs=>S.orders.filter(o=>!o.cancel&&bs.some(b=>b.id===o.batch)).reduce((a,o)=>a+o.jf,0);
+return `<h2>Dashboard jastiper</h2>${u.vs!=='ok'?'<div class="note">Akunmu belum terverifikasi. Ajukan verifikasi di <a href="#/profile"><b>profil</b></a> agar admin dapat menyetujui.</div>':''}<div class="grid mt"><div class="card"><div class="mut">Batch aktif</div><b style="font-size:1.7rem">${act.length}</b></div><div class="card"><div class="mut">Batch selesai</div><b style="font-size:1.7rem">${done.length}</b></div><div class="card"><div class="mut">Penghasilan (fee jastip)</div><b style="font-size:1.7rem">${rp(earn(done))}</b></div><div class="card"><div class="mut">Estimasi batch berjalan</div><b style="font-size:1.7rem">${rp(earn(act))}</b></div></div>
+<h3 class="mt">Batch yang dapat diklaim</h3>${free.length?free.map(b=>`<div class="card row sp" style="margin-bottom:10px"><a href="#/b/${b.id}" style="text-decoration:none"><b>${b.id}</b> <span class="tag">${SL[b.st]}</span><div class="mut">${cnt(b)} pesanan, ${b.day} ${b.dep}, biaya perjalanan ${rp(b.cost)}, ${S.pts[b.pt]}</div></a><button class="btn sm" data-act="claim" data-id="${b.id}">Klaim batch</button></div>`).join(''):'<div class="empty">Tidak ada batch untuk diklaim.</div>'}
+<h3 class="mt">Batch saya</h3>${act.length?act.map(b=>`<a class="card" href="#/b/${b.id}" style="margin-bottom:10px"><div class="row sp"><div><b>${b.id}</b> <span class="tag o">${SL[b.st]}</span><div class="mut">${cnt(b)} pesanan, ${b.day} ${b.dep}</div></div><span class="btn sm g">Kelola pesanan</span></div></a>`).join(''):'<div class="empty">Kamu belum mengklaim batch.</div>'}
+<h3 class="mt">Riwayat batch</h3>${done.length?done.map(b=>`<a class="card" href="#/b/${b.id}" style="margin-bottom:10px"><b>${b.id}</b> <span class="mut">${b.day}, ${cnt(b)} pesanan, fee ${rp(earn([b]))}</span></a>`).join(''):'<div class="empty">Belum ada riwayat.</div>'}`};
+R.admin=t=>{t=t||'ringkasan';const tabs=[['ringkasan','Ringkasan'],['produk','Produk'],['batch','Batch'],['voucher','Voucher'],['pengguna','Pengguna'],['pesanan','Pesanan']];let h=`<h2>Admin</h2><div class="tabs">${tabs.map(x=>`<a href="#/admin/${x[0]}" class="${x[0]===t?'on':''}">${x[1]}</a>`).join('')}</div>`;
+if(t==='ringkasan'){const paid=S.orders.filter(o=>o.paid&&!o.cancel);h+=`<div class="grid">${[['Pengguna',S.users.length],['Pesanan',S.orders.length],['Transaksi lunas',rp(paid.reduce((a,o)=>a+o.total,0))],['Fee jastip',rp(paid.reduce((a,o)=>a+o.jf,0))],['Batch aktif',S.batches.filter(b=>!['completed','cancelled'].includes(b.st)).length],['Menunggu verifikasi',S.users.filter(u=>u.vs==='pending').length]].map(x=>`<div class="card"><div class="mut">${x[0]}</div><b style="font-size:1.6rem">${x[1]}</b></div>`).join('')}</div>`}
+if(t==='produk')h+=`<form class="card" data-form="newp"><h3>Tambah produk</h3><div class="grid"><div><label for="np1">Nama</label><input id="np1" required></div><div><label for="np2">Merchant</label><input id="np2" required></div><div><label for="np3">Kategori</label><select id="np3">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div><div><label for="np4">Harga (Rp)</label><input id="np4" type="number" min="0" required></div></div><button class="btn mt">Simpan produk</button></form><div class="mt">${S.products.map(p=>`<div class="card row sp" style="margin-bottom:8px"><div><b>${esc(p.name)}</b> <span class="tag ${p.on?'':'r'}">${p.on?'Aktif':'Nonaktif'}</span><div class="mut">${esc(p.merchant)}, ${p.cat}, ${rp(p.price)}</div></div><button class="btn o sm" data-act="togp" data-id="${p.id}">${p.on?'Nonaktifkan':'Aktifkan'}</button></div>`).join('')}</div>`;
+if(t==='batch')h+=`<form class="card" data-form="newb"><h3>Buat batch</h3><div class="grid"><div><label for="nb1">Tanggal</label><input id="nb1" type="date" required></div><div><label for="nb2">Berangkat</label><input id="nb2" type="time" value="15:00" required></div><div><label for="nb3">Tiba maks</label><input id="nb3" type="time" value="17:00" required></div><div><label for="nb4">Batas pesanan</label><input id="nb4" type="datetime-local" required></div><div><label for="nb5">Biaya perjalanan</label><input id="nb5" type="number" min="0" value="15000" required></div><div><label for="nb6">Titik pengambilan</label><select id="nb6">${S.pts.map((p,i)=>`<option value="${i}">${p}</option>`).join('')}</select></div></div><button class="btn mt">Buat batch</button></form><div class="mt">${S.batches.map(b=>`<div class="card row sp" style="margin-bottom:8px"><a href="#/b/${b.id}" style="text-decoration:none"><b>${b.id}</b> <span class="tag o">${SL[b.st]}</span><div class="mut">${b.day} ${b.dep}, ${cnt(b)} pesanan, jastiper ${b.j?esc(usr(b.j).name):'-'}</div></a>${['open','locked'].includes(b.st)?`<button class="btn r sm" data-act="cancelb" data-id="${b.id}">Batalkan batch</button>`:''}</div>`).join('')}</div>`;
+if(t==='voucher')h+=`<form class="card" data-form="newv"><h3>Tambah voucher</h3><div class="grid"><div><label for="nv1">Kode</label><input id="nv1" required></div><div><label for="nv2">Jenis</label><select id="nv2"><option value="fixed">Potongan tetap</option><option value="pct">Persentase</option><option value="ship">Gratis ongkir</option></select></div><div><label for="nv3">Nilai</label><input id="nv3" type="number" min="0" value="5000"></div><div><label for="nv4">Min. belanja</label><input id="nv4" type="number" min="0" value="20000"></div><div><label for="nv5">Kuota</label><input id="nv5" type="number" min="1" value="50"></div></div><button class="btn mt">Simpan voucher</button></form><div class="mt">${S.vouchers.map(v=>`<div class="card row sp" style="margin-bottom:8px"><div><b>${esc(v.code)}</b> <span class="tag ${v.on?'':'r'}">${v.on?'Aktif':'Nonaktif'}</span><div class="mut">${esc(v.d)}. Terpakai ${v.used}/${v.quota}</div></div><button class="btn o sm" data-act="togv" data-id="${esc(v.code)}">${v.on?'Nonaktifkan':'Aktifkan'}</button></div>`).join('')}</div>`;
+if(t==='pengguna')h+=S.users.map(u=>`<div class="card row sp" style="margin-bottom:8px"><div><b>${esc(u.name)}</b> <span class="tag ${u.on?'':'r'}">${u.on?u.role:'Nonaktif'}</span> <span class="tag ${u.vs==='ok'?'':'o'}">${u.vs==='ok'?'Terverifikasi':u.vs==='pending'?'Menunggu verifikasi':'Belum verifikasi'}</span><div class="mut">${esc(u.email)}${u.nim?', NIM '+esc(u.nim):''}</div></div><div class="row"><select data-chg="role" data-id="${u.id}" aria-label="Role" style="width:auto">${['customer','jastiper','admin'].map(r=>`<option ${r===u.role?'selected':''}>${r}</option>`).join('')}</select>${u.vs==='pending'?`<button class="btn sm" data-act="verify" data-id="${u.id}">Setujui verifikasi</button><button class="btn o sm" data-act="reject" data-id="${u.id}">Tolak verifikasi</button>`:''}${u.id!==S.me?`<button class="btn o sm" data-act="togu" data-id="${u.id}">${u.on?'Nonaktifkan':'Aktifkan'}</button>`:''}</div></div>`).join('');
+if(t==='pesanan')h+=S.orders.slice().reverse().map(o=>`<div class="card row sp" style="margin-bottom:8px"><a href="#/o/${o.code}" style="text-decoration:none"><b>${o.code}</b> <span class="tag ${ostat(o)[1]}">${ostat(o)[0]}</span><div class="mut">${esc(usr(o.uid).name)}, ${o.batch}, ${rp(o.total)}, ${o.paid?'lunas':'belum dibayar'}</div></a>${!o.paid&&!o.cancel?`<button class="btn sm g" data-act="adminpay" data-o="${o.code}">Tandai lunas</button>`:''}</div>`).join('');
+return h};
+R.login=()=>`<form class="card auth" data-form="login"><h2>Masuk</h2><label for="le">Email</label><input id="le" type="email" required autocomplete="username"><label for="lp">Kata sandi</label><input id="lp" type="password" required autocomplete="current-password"><div class="err" id="lerr"></div><button class="btn full mt">Masuk</button><p class="mut">Belum punya akun? <a href="#/register"><b>Daftar</b></a></p></form>`;
+R.register=()=>`<form class="card auth" data-form="register"><h2>Daftar</h2><label for="rn">Nama lengkap</label><input id="rn" required><label for="rph">Nomor telepon</label><input id="rph" type="tel" required><label for="re">Email</label><input id="re" type="email" required><label for="rp">Kata sandi (min. 8 karakter)</label><input id="rp" type="password" minlength="8" required autocomplete="new-password"><label for="rr">Daftar sebagai</label><select id="rr"><option value="customer">Pelanggan</option><option value="jastiper">Jastiper</option></select><div class="err" id="rerr"></div><button class="btn full mt">Buat akun</button><p class="mut">Sudah punya akun? <a href="#/login"><b>Masuk</b></a></p></form>`;
+R.profile=()=>{const u=me();return `<h2>Profil</h2><div class="two"><form class="card" data-form="profile"><label for="pn" style="margin-top:0">Nama lengkap</label><input id="pn" value="${esc(u.name)}" required><label for="pp">Telepon</label><input id="pp" value="${esc(u.phone)}" required><label>Email</label><input value="${esc(u.email)}" disabled><div class="row mt"><span class="tag">${u.role}</span><span class="tag ${u.vs==='ok'?'':'o'}">${u.vs==='ok'?'Terverifikasi':u.vs==='pending'?'Menunggu verifikasi':'Belum terverifikasi'}</span></div><button class="btn mt">Simpan perubahan</button></form>
+<form class="card" data-form="verif"><h3>Verifikasi mahasiswa UNNES</h3><p class="mut">NIM dan email kampus hanya dilihat admin, tidak ditampilkan ke publik.</p>${u.vs==='ok'?'<p><span class="tag">Akunmu sudah terverifikasi</span></p>':u.vs==='pending'?'<p><span class="tag o">Pengajuan sedang ditinjau admin</span></p>':`<label for="vn">NIM</label><input id="vn" required inputmode="numeric"><label for="ve">Email UNNES</label><input id="ve" type="email" placeholder="nama@students.unnes.ac.id" required><div class="err" id="verr"></div><button class="btn mt">Ajukan verifikasi</button>`}</form></div><button class="btn o mt" data-act="logout">Keluar</button>`};
+R.nf=()=>`<div class="empty"><h2>Halaman tidak ditemukan</h2><a class="btn" href="#/">Ke beranda</a></div>`;
+const NEED={checkout:1,orders:1,o:1,profile:1,jastiper:['jastiper','admin'],admin:['admin']};
+function nav(){const cur=CUR,[r0,a]=CUR.slice(2).split('/').map(decodeURIComponent),r=r0||'home',u=me();
+if(NEED[r]&&!u){S.next=CUR;return go('#/login')}
+if(Array.isArray(NEED[r])&&!NEED[r].includes(u.role)){$('#app').innerHTML=`<div class="empty"><h2>Akses ditolak</h2><p>Halaman ini hanya untuk ${NEED[r].join(' atau ')}.</p><a class="btn" href="#/">Ke beranda</a></div>`;return head(r)}
+head(r);const html=(R[r]||R.nf)(a);if(CUR!==cur)return;$('#app').innerHTML=html;
+if(r==='home')sim();if(r==='catalog')setTimeout(drawCat,280);if(r==='checkout'){VC=null;quote()}}
+function head(r){const u=me(),L=[['','Beranda','home'],['catalog','Katalog','catalog'],['batches','Batch Aktif','batches'],['orders','Pesanan Saya','orders']];if(u&&['jastiper','admin'].includes(u.role))L.push(['jastiper','Dashboard Jastiper','jastiper']);if(u&&u.role==='admin')L.push(['admin','Admin','admin']);
+$('#nav').innerHTML=L.map(l=>`<a href="#/${l[0]}" class="${r===l[2]||(r==='p'&&l[2]==='catalog')||(r==='b'&&l[2]==='batches')||(r==='o'&&l[2]==='orders')?'on':''}">${l[1]}</a>`).join('');
+$('#right').innerHTML=`<button class="btn g sm" data-act="drawer">Keranjang (${cartN()})</button>`+(u?`<a class="btn o sm" href="#/profile">Profil</a><button class="btn o sm" data-act="logout">Keluar</button>`:`<a class="btn o sm" href="#/login">Masuk</a><a class="btn sm" href="#/register">Daftar</a>`)}
+function sim(){const n=+$('#sim').value,c=15000,s=Math.ceil(c/n);$('#simn').textContent=n;$('#simo').innerHTML=`<div><span>Kirim sendiri</span><span>${rp(c)}</span></div><div><span>Ongkir patungan</span><b>${rp(s)}</b></div><div><span>Hemat (estimasi)</span><b style="color:var(--g7)">${rp(c-s)}</b></div>`}
+function addCart(id,q=1){const p=prod(id),c=S.cart.find(x=>x.id==id);if(!p||!p.on)return toast('Produk sedang tidak tersedia',1),false;const n=(c?c.q:0)+q;if(n>p.max)return toast('Maksimal '+p.max+' per pesanan',1),false;c?c.q=n:S.cart.push({id:p.id,q});return true}
+async function setBatchSt(b,s){b.st=s;S.orders.filter(o=>o.batch===b.id&&!o.cancel).forEach(o=>log(o,'Status batch: '+SL[s]));await updateDB('batches',{st:s},'id',b.id);for(let o of S.orders.filter(x=>x.batch===b.id))await saveOrderToDB(o);}
+const A={
+mx(){$('#modal').classList.remove('on')},
+add(e){if(addCart(+e.dataset.id)){rf();toast('Masuk keranjang. Ketuk untuk melihat.',0,()=>A.drawer())}},
+pq(e){$('#pq').textContent=Math.max(1,Math.min(+e.dataset.max,+$('#pq').textContent+ +e.dataset.d))},
+addq(e){if(addCart(+e.dataset.id,+$('#pq').textContent)){nav();toast('Masuk keranjang. Ketuk untuk melihat.',0,()=>A.drawer())}},
+buy(e){if(addCart(+e.dataset.id,+$('#pq').textContent))go('#/checkout')},
+inc(e){const c=S.cart.find(x=>x.id==e.dataset.id);if(c.q<prod(c.id).max)c.q++;else toast('Batas maksimal tercapai',1);rf()},
+dec(e){const c=S.cart.find(x=>x.id==e.dataset.id);if(--c.q<1)S.cart=S.cart.filter(x=>x!==c);rf()},
+del(e){S.cart=S.cart.filter(x=>x.id!=e.dataset.id);rf()},
+fav(e){const i=+e.dataset.id,k=S.fav.indexOf(i);k<0?S.fav.push(i):S.fav.splice(k,1);saveFav();rf()},
+chip(e){$('#cf').value=e.dataset.c;drawCat()},
+drawer(){drawDrawer();$('#drawer').classList.add('on')},
+dclose(e){$('#drawer').classList.remove('on');const h=e.getAttribute&&e.getAttribute('href');if(h)go(h)},
+copy(){navigator.clipboard?navigator.clipboard.writeText(location.href).then(()=>toast('Tautan disalin'),()=>toast('Tautan tidak dapat disalin',1)):toast('Tautan tidak dapat disalin',1)},
+tobatch(e){S.pref=e.dataset.id;if(S.cart.length){toast('Batch '+S.pref+' dipilih');go('#/checkout')}else{toast('Batch '+S.pref+' dipilih. Pilih barangnya dulu.');go('#/catalog')}},
+unpref(){S.pref=null;go('#/batches')},
+back(e){HIST.length?go(HIST.pop(),1):go(e.getAttribute('href'),1)},
+applyv(){const c=$('#cv').value.trim().toUpperCase(),v=S.vouchers.find(x=>x.code===c),sub=subOf(S.cart.map(x=>({q:x.q,p:prod(x.id).price}))),m=$('#vm');VC=null;
+if(!v||!v.on)m.textContent='Kode voucher tidak valid.';else if(Date.now()&&v.used>=v.quota)m.textContent='Kuota voucher habis.';else if(S.orders.some(o=>o.uid===S.me&&o.vc===c&&!o.cancel))m.textContent='Voucher sudah pernah kamu pakai.';else if(sub<v.min)m.textContent='Minimal belanja '+rp(v.min)+'.';else{VC=v;m.textContent='Voucher dipakai: '+v.d}quote()},
+place(){const b=bt($('#cb').value),pt=+$('#cp').value,m=$('#cm').value,y=$('#cy').value,n=$('#cn').value.trim();if(!b)return toast('Tidak ada batch terbuka',1);
+ask(`<h3>Konfirmasi pesanan</h3><p>Pesanan masuk ke batch <b>${b.id}</b> dan diantar sesuai jadwal (${b.day} ${b.dep}), bukan instan. Pembatalan gratis selama batch masih terbuka. Lanjutkan?</p>`,async ()=>{
+const nb=bt(b.id);if(!isOpen(nb)){toast('Batch sudah ditutup. Pilih batch lain.',1);return nav()}
+for(const c of S.cart){const p=prod(c.id);if(!p.on||c.q>p.max){toast(p.name+' tidak tersedia',1);return go('#/cart')}}
+const o=mkOrder(S.me,nb.id,S.cart.map(c=>[c.id,c.q]),m);o.pt=pt;o.pay=y;o.note=n;const v=VC&&S.vouchers.find(x=>x.code===VC.code);
+if(v&&v.on&&v.used<v.quota){o.dc=disc(v,o.sub,o.sh,o.jf,o.ex);if(o.dc){o.vc=v.code;v.used++;await updateDB('vouchers',{used:v.used},'code',v.code)}}o.total=o.sub+o.jf+o.sh+o.ex-o.dc;
+S.orders.push(o);await saveOrderToDB(o);S.cart=[];S.pref=null;toast('Pesanan dibuat');go('#/o/'+o.code)})},
+async pay(e){const o=S.orders.find(x=>x.code===e.dataset.o);o.paid=true;log(o,'Pembayaran dikonfirmasi pemesan');await saveOrderToDB(o);toast('Pembayaran dicatat');nav()},
+async adminpay(e){const o=S.orders.find(x=>x.code===e.dataset.o);o.paid=true;log(o,'Pembayaran diterima admin');await saveOrderToDB(o);nav()},
+cancel(e){ask('<h3>Batalkan pesanan?</h3><p>Batch masih terbuka, jadi pembatalan tidak dikenai biaya.</p>',async ()=>{const o=S.orders.find(x=>x.code===e.dataset.o);o.cancel=true;log(o,'Pesanan dibatalkan pemesan');const v=S.vouchers.find(x=>x.code===o.vc);if(v){v.used--;await updateDB('vouchers',{used:v.used},'code',v.code)}await saveOrderToDB(o);toast('Pesanan dibatalkan');nav()},'Ya, batalkan')},
+async claim(e){const u=me();ask(`<h3>Klaim batch ${e.dataset.id}?</h3><p>Kamu bertanggung jawab berbelanja dan mengantar semua pesanan di batch ini.</p>`,async ()=>{bt(e.dataset.id).j=u.id;await updateDB('batches',{j:u.id},'id',e.dataset.id);toast('Batch diklaim');nav()})},
+adv(e){const b=bt(e.dataset.id),n=STEPS[STEPS.indexOf(b.st)+1];ask(`<h3>Ubah status batch?</h3><p>Status akan menjadi <b>${SL[n]}</b> dan dicatat di riwayat semua pesanan.</p>`,async ()=>{await setBatchSt(b,n);toast('Status: '+SL[n]);nav()})},
+async ready(e){const o=S.orders.find(x=>x.code===e.dataset.o);o.ready=true;log(o,'Pesanan siap diambil');await saveOrderToDB(o);toast('Ditandai siap diambil');nav()},
+async togp(e){const p=prod(e.dataset.id);p.on=!p.on;await updateDB('products',{on:p.on},'id',p.id);nav()},
+async togv(e){const v=S.vouchers.find(x=>x.code===e.dataset.id);v.on=!v.on;await updateDB('vouchers',{on:v.on},'code',v.code);nav()},
+async togu(e){const u=usr(e.dataset.id);u.on=!u.on;await updateDB('users',{on:u.on},'id',u.id);nav()},
+async verify(e){const u=usr(e.dataset.id);u.vs='ok';await updateDB('users',{vs:'ok'},'id',u.id);toast('Pengguna terverifikasi');nav()},
+async reject(e){const u=usr(e.dataset.id);u.vs='none';await updateDB('users',{vs:'none'},'id',u.id);toast('Pengguna ditolak');nav()},
+cancelb(e){ask('<h3>Batalkan batch?</h3><p>Semua pesanan di batch ini ikut dibatalkan.</p>',async ()=>{const b=bt(e.dataset.id);b.st='cancelled';await updateDB('batches',{st:'cancelled'},'id',b.id);for(let o of S.orders.filter(o=>o.batch===b.id&&!o.cancel)){o.cancel=true;log(o,'Batch dibatalkan admin');await saveOrderToDB(o);}toast('Batch dibatalkan');nav()},'Ya, batalkan')},
+logout(){S.me=null;S.cart=[];toast('Kamu sudah keluar');go('#/')}};
+
+const F={
+login(){const u=S.users.find(x=>x.email===$('#le').value.trim().toLowerCase()&&x.pass===$('#lp').value);if(!u)return $('#lerr').textContent='Email atau kata sandi salah.';if(!u.on)return $('#lerr').textContent='Akun ini dinonaktifkan. Hubungi admin.';S.me=u.id;const n=S.next||'#/';S.next=null;toast('Selamat datang, '+u.name.split(' ')[0]);go(n)},
+async register(){const e=$('#re').value.trim().toLowerCase(),er=$('#rerr');if(S.users.some(u=>u.email===e))return er.textContent='Email sudah terdaftar. Silakan masuk.';if(!/^[0-9+]{8,15}$/.test($('#rph').value.trim()))return er.textContent='Nomor telepon tidak valid.';
+const u={id:Date.now(),name:$('#rn').value.trim(),email:e,pass:$('#rp').value,phone:$('#rph').value.trim(),role:$('#rr').value,nim:'',vs:'none',"on":true};
+await sb.from('users').insert(u);S.users.push(u);S.me=u.id;const n=S.next||'#/';S.next=null;toast('Akun dibuat');go(n)},
+async profile(){const u=me();u.name=$('#pn').value.trim();u.phone=$('#pp').value.trim();await updateDB('users',{name:u.name,phone:u.phone},'id',u.id);toast('Profil disimpan');head('profile')},
+async verif(){const e=$('#ve').value.trim().toLowerCase();if(!/@(students\.|mhs\.)?unnes\.ac\.id$/.test(e))return $('#verr').textContent='Gunakan email UNNES (contoh: nama@students.unnes.ac.id).';if(!/^\d{8,15}$/.test($('#vn').value.trim()))return $('#verr').textContent='NIM harus berupa angka.';const u=me();u.nim=$('#vn').value.trim();u.vs='pending';await updateDB('users',{nim:u.nim,vs:'pending'},'id',u.id);toast('Pengajuan dikirim ke admin');nav()},
+async review(f){const o=S.orders.find(x=>x.code===f.dataset.o);const rev={o:o.code,r:+$('#rt').value,c:$('#rc').value.trim()};await sb.from('reviews').insert(rev);S.reviews.push(rev);toast('Terima kasih atas ulasanmu');nav()},
+async newp(){const p={id:Math.max(...S.products.map(p=>p.id))+1,name:$('#np1').value.trim(),merchant:$('#np2').value.trim(),cat:$('#np3').value,price:Math.floor(+$('#np4').value),max:5,"on":true};await sb.from('products').insert(p);S.products.push(p);toast('Produk ditambahkan');nav()},
+async newb(){const co=new Date($('#nb4').value).getTime();if(!co)return toast('Isi batas pesanan',1);const d=new Date($('#nb1').value);const b={id:'TN-'+String(S.batches.length+1).padStart(3,'0'),day:d.toLocaleDateString('id-ID',{day:'numeric',month:'short'}),dep:$('#nb2').value,arr:$('#nb3').value,cut:co,st:'open',min:3,max:12,cost:Math.floor(+$('#nb5').value),pt:+$('#nb6').value,j:null};await sb.from('batches').insert(b);S.batches.push(b);toast('Batch dibuat');nav()},
+async newv(){const c=$('#nv1').value.trim().toUpperCase();if(S.vouchers.some(v=>v.code===c))return toast('Kode sudah ada',1);const t=$('#nv2').value,v=Math.floor(+$('#nv3').value);const vo={code:c,t,v,min:Math.floor(+$('#nv4').value),max:t==='pct'?10000:0,quota:Math.floor(+$('#nv5').value),used:0,"on":true,d:t==='fixed'?'Diskon '+rp(v):t==='pct'?'Diskon '+v+'%':'Gratis ongkir'};await sb.from('vouchers').insert(vo);S.vouchers.push(vo);toast('Voucher ditambahkan');nav()}};
+
+const CH={sim,filt:drawCat,quote,
+async ist(e){const o=S.orders.find(x=>x.code===e.dataset.o);o.items[e.dataset.k].st=e.value;log(o,o.items[e.dataset.k].n+': '+ISL[e.value]);await saveOrderToDB(o);toast('Status item diperbarui')},
+async inote(e){const o=S.orders.find(x=>x.code===e.dataset.o);o.items[e.dataset.k].note=e.value;await saveOrderToDB(o)},
+async role(e){const u=usr(e.dataset.id);u.role=e.value;await updateDB('users',{role:e.value},'id',u.id);toast('Role diubah')}};
+
+document.addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.remove('on');const t=e.target.closest('[data-act]');if(t&&A[t.dataset.act]){e.preventDefault();A[t.dataset.act](t);return}const l=e.target.closest('a[href^="#/"]');if(l){e.preventDefault();go(l.getAttribute('href'))}});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-form]');if(f){e.preventDefault();F[f.dataset.form](f)}});
+document.addEventListener('input',e=>{const c=e.target.dataset.chg;if(c&&['sim','filt'].includes(c))CH[c](e.target)});
+document.addEventListener('change',e=>{const c=e.target.dataset.chg;if(c&&CH[c]&&!['sim','filt'].includes(c))CH[c](e.target)});
+window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#/')&&location.hash!==CUR)go(location.hash)});
+
+// Mulai aplikasi dengan memuat data dari Supabase
+initDB();
+
+setInterval(()=>document.querySelectorAll('[data-cd]').forEach(e=>{const t=Math.floor((e.dataset.cd-Date.now())/1000);e.textContent=t<=0?'ditutup':Math.floor(t/3600)+' j '+String(Math.floor(t%3600/60)).padStart(2,'0')+' m '+String(t%60).padStart(2,'0')+' d'}),1000);
+</script>
+</body>
+</html>
