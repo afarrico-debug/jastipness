@@ -106,7 +106,6 @@ async function initDB() {
   const { data: reviews } = await sb.from('reviews').select('*');
 
   if (!users || users.length === 0) {
-    // Seed default data if empty
     const raw=[["Nasi Ayam Geprek","makanan",18000,"Warung Makan Semarang Bawah"],["Mie Ayam Bakso","makanan",15000,"Warung Makan Semarang Bawah"],["Nasi Goreng Spesial","makanan",16000,"Warung Makan Semarang Bawah"],["Soto Ayam","makanan",14000,"Warung Makan Semarang Bawah"],["Lumpia Semarang (3 pcs)","makanan",20000,"Warung Makan Semarang Bawah"],
     ["Es Teh Manis Jumbo","minuman",6000,"Kedai Minum Semarang Bawah"],["Kopi Susu Gula Aren","minuman",15000,"Kedai Minum Semarang Bawah"],["Matcha Latte","minuman",17000,"Kedai Minum Semarang Bawah"],["Jus Alpukat","minuman",13000,"Kedai Minum Semarang Bawah"],["Air Mineral 1,5 L","minuman",6000,"Kedai Minum Semarang Bawah"],
     ["Sapu Lantai","kebutuhan kos",22000,"Toko Kebutuhan Kos"],["Gantungan Baju (isi 10)","kebutuhan kos",15000,"Toko Kebutuhan Kos"],["Lampu LED 9 Watt","kebutuhan kos",20000,"Toko Kebutuhan Kos"],["Colokan Terminal 4 Lubang","kebutuhan kos",45000,"Toko Kebutuhan Kos"],
@@ -243,7 +242,7 @@ R.nf=()=>`<div class="empty"><h2>Halaman tidak ditemukan</h2><a class="btn" href
 const NEED={checkout:1,orders:1,o:1,profile:1,jastiper:['jastiper','admin'],admin:['admin']};
 function nav(){const cur=CUR,[r0,a]=CUR.slice(2).split('/').map(decodeURIComponent),r=r0||'home',u=me();
 if(NEED[r]&&!u){S.next=CUR;return go('#/login')}
-if(Array.isArray(NEED[r])&&!NEED[r].includes(u.role)){$('#app').innerHTML=`<div class="empty"><h2>Akses ditolak</h2><p>Halaman ini hanya untuk ${NEED[r].join(' atau ')}.</p><a class="btn" href="#/">Ke beranda</a></div>`;return head(r)}
+if(Array.isArray(NEED[r])&&!NEED[r].includes(u.role)){$('#app').innerHTML=`<div class="empty"><h2>Akses ditolak</h2><p>Halaman ini hanya untuk ${NEED[r].join(' atau ')}.</p><a class="btn" href="#/keberanda">Ke beranda</a></div>`;return head(r)}
 head(r);const html=(R[r]||R.nf)(a);if(CUR!==cur)return;$('#app').innerHTML=html;
 if(r==='home')sim();if(r==='catalog')setTimeout(drawCat,280);if(r==='checkout'){VC=null;quote()}}
 function head(r){const u=me(),L=[['','Beranda','home'],['catalog','Katalog','catalog'],['batches','Batch Aktif','batches'],['orders','Pesanan Saya','orders']];if(u&&['jastiper','admin'].includes(u.role))L.push(['jastiper','Dashboard Jastiper','jastiper']);if(u&&u.role==='admin')L.push(['admin','Admin','admin']);
@@ -315,7 +314,6 @@ document.addEventListener('input',e=>{const c=e.target.dataset.chg;if(c&&['sim',
 document.addEventListener('change',e=>{const c=e.target.dataset.chg;if(c&&CH[c]&&!['sim','filt'].includes(c))CH[c](e.target)});
 window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#/')&&location.hash!==CUR)go(location.hash)});
 
-// Mulai aplikasi dengan memuat data dari Supabase
 initDB();
 
 setInterval(()=>document.querySelectorAll('[data-cd]').forEach(e=>{const t=Math.floor((e.dataset.cd-Date.now())/1000);e.textContent=t<=0?'ditutup':Math.floor(t/3600)+' j '+String(Math.floor(t%3600/60)).padStart(2,'0')+' m '+String(t%60).padStart(2,'0')+' d'}),1000);
